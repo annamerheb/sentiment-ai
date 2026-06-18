@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from src.schemas import PredictionRequest, PredictionResponse
 from src.model import SentimentModel
 
+# test pipeline auto
 app = FastAPI(
     title="SentimentAI",
     version="0.1.0"
