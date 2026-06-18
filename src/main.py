@@ -28,3 +28,4 @@ def predict(request: PredictionRequest):
     retourne un label + score.
     """
     return model.predict(request.text)
+    

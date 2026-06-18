@@ -16,3 +16,4 @@ class PredictionResponse(BaseModel):
 
     # Texte original pour traçabilité
     text: str
+    
