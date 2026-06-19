@@ -5,7 +5,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'sentiment-ai'
-        REGISTRY = 'ghcr.io/VOTRE_PSEUDO' // remplacez VOTRE_PSEUDO
+        REGISTRY = 'ghcr.io/annamerheb'
 
         // IMAGE_TAG = SHA Git court du commit (ex: a3f8c12)
         // Chaque build produit une image taguée de façon unique et traçable
