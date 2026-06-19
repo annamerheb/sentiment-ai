@@ -3,8 +3,6 @@ from fastapi import FastAPI
 from src.schemas import PredictionRequest, PredictionResponse
 from src.model import SentimentModel
 
-import os  # import inutilisé
-
 # ancien code
 # result = model.predict(text)
 # return result
