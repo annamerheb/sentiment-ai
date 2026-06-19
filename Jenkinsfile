@@ -41,36 +41,23 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-
-                    # Supprimer un éventuel conteneur test-runner résiduel
-                    docker rm -f test-runner 2>/dev/null || true
-
-                    # Lancer les tests en nommant le conteneur pour copier coverage.xml
-                    set +e
-                    docker run \
-                        -e CI=true \
-                        --name test-runner \
-                        ${IMAGE_NAME}:${IMAGE_TAG} \
-                        pytest tests/ -v \
-                        --cov=src \
-                        --cov-report=xml:/tmp/coverage.xml \
-                        --cov-report=term-missing \
-                        --cov-fail-under=70
-
-                    TEST_EXIT_CODE=$?
-                    set -e
-
-                    # Copier coverage.xml depuis le conteneur vers le workspace
-                    docker cp test-runner:/tmp/coverage.xml ./coverage.xml 2>/dev/null || true
-
-                    docker rm -f test-runner 2>/dev/null || true
-
-                    # Retourner le code de sortie des tests
-                    exit $TEST_EXIT_CODE
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+ 
+                docker run --rm \
+                  -e CI=true \
+                  --volumes-from jenkins \
+                  -w "$WORKSPACE" \
+                  ${IMAGE_NAME}:${IMAGE_TAG} \
+                  pytest tests/ -v \
+                  --cov=src \
+                  --cov-report=xml:coverage.xml \
+                  --cov-report=term-missing \
+                  --cov-fail-under=70
+ 
+                ls -l coverage.xml
+                grep -n "filename=" coverage.xml | head -20
                 '''
             }
-
             post {
                 failure {
                     echo 'Tests échoués ou coverage insuffisant (< 70%)'
