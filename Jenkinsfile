@@ -62,8 +62,11 @@ pipeline {
 
         stage('Push') {
             when {
-                expression {
-                    return env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main'
+                anyOf {
+                    branch 'main'
+                    expression {
+                        env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main'
+                    }
                 }
             }
 
@@ -75,11 +78,11 @@ pipeline {
                         passwordVariable: 'REGISTRY_PASS'
                     )
                 ]) {
-
                     sh """
-                        echo \$REGISTRY_PASS | docker login ghcr.io \
-                            -u \$REGISTRY_USER --password-stdin
+                        echo "\$REGISTRY_PASS" | docker login ghcr.io \
+                            -u "\$REGISTRY_USER" --password-stdin
 
+                        docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
 
                         docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${IMAGE_NAME}:latest
