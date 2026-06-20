@@ -161,27 +161,18 @@ pipeline {
         }
 
         stage('Deploy Staging') {
-            when {
-                anyOf {
-                    branch 'main'
-                    expression {
-                        env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main'
-                    }
-                }
-            }
-
+            when { branch 'main' }
             steps {
-                echo "Déploiement de ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} en staging"
-
-                sh '''
-                    # Arrêter le staging précédent proprement
-                    docker-compose -f docker-compose.yml -p staging down 2>/dev/null || true
-
-                    # Démarrer la nouvelle version
-                    docker-compose -f docker-compose.yml -p staging up -d
-
+                echo "Déploiement de ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} en staging..."
+                sh """
+                    docker stop sentiment-ai-staging 2>/dev/null || true
+                    docker rm sentiment-ai-staging 2>/dev/null || true
+                    docker run -d \
+                        --name sentiment-ai-staging \
+                        -p 8001:8000 \
+                        ${IMAGE_NAME}:${IMAGE_TAG}
                     echo "Staging disponible sur http://localhost:8001"
-                '''
+                """
             }
         }
     }
