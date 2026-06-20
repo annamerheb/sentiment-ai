@@ -7,6 +7,10 @@ from src.model import SentimentModel
 # result = model.predict(text)
 # return result
 
+def unused_function():
+    x = 1
+    return 2
+
 # test pipeline auto
 app = FastAPI(
     title="SentimentAI",
