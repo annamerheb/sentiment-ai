@@ -3,13 +3,6 @@ from fastapi import FastAPI
 from src.schemas import PredictionRequest, PredictionResponse
 from src.model import SentimentModel
 
-
-def debug_placeholder():
-    # TODO: remove this function
-    pass
-
-
-# test pipeline auto
 app = FastAPI(
     title="SentimentAI",
     version="0.1.0"
