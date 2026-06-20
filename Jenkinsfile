@@ -175,10 +175,10 @@ pipeline {
 
                 sh '''
                     # Arrêter le staging précédent proprement
-                    docker compose -f docker-compose.yml -p staging down 2>/dev/null || true
+                    docker-compose -f docker-compose.yml -p staging down 2>/dev/null || true
 
                     # Démarrer la nouvelle version
-                    docker compose -f docker-compose.yml -p staging up -d
+                    docker-compose -f docker-compose.yml -p staging up -d
 
                     echo "Staging disponible sur http://localhost:8001"
                 '''
