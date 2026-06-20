@@ -4,9 +4,9 @@ from src.schemas import PredictionRequest, PredictionResponse
 from src.model import SentimentModel
 
 
-def unused_function():
-    _x = 1
-    return 2
+def debug_placeholder():
+    # TODO: remove this function
+    pass
 
 
 # test pipeline auto
