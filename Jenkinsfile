@@ -180,10 +180,8 @@ pipeline {
                 dir('infra') {
                     sh 'terraform init -input=false'
                     sh '''
-                        NETWORK_ID=$(docker network inspect cicd-network --format '{{.Id}}' 2>/dev/null || true)
-                        if [ -n "$NETWORK_ID" ]; then
-                            terraform import -input=false docker_network.cicd $NETWORK_ID || true
-                        fi
+                        docker stop sentiment-staging || true
+                        docker rm sentiment-staging || true
                     '''
                     sh """
                         terraform apply -auto-approve \

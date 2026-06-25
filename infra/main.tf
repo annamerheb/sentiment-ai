@@ -13,10 +13,6 @@ provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
 
-resource "docker_network" "cicd" {
-  name = "cicd-network"
-}
-
 # Image Docker SentimentAI -- image LOCALE buildée par Jenkins
 resource "docker_image" "sentiment" {
   name         = "sentiment-ai:${var.image_tag}"
@@ -30,7 +26,7 @@ resource "docker_container" "sentiment_staging" {
   restart = "unless-stopped"
 
   networks_advanced {
-    name = docker_network.cicd.name
+    name = "cicd-network"
   }
 
   ports {
