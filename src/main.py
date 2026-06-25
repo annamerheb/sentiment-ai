@@ -13,11 +13,13 @@ predictions_total = Counter(
     "Nombre total de prédictions",
     ["label", "status"]
 )
+
 confidence_gauge = Gauge(
     "sentiment_confidence_score",
     "Score de confiance de la dernière prédiction",
     ["label"]
 )
+
 prediction_duration = Histogram(
     "sentiment_prediction_duration_seconds",
     "Durée des prédictions en secondes",
@@ -26,9 +28,11 @@ prediction_duration = Histogram(
 
 Instrumentator().instrument(app).expose(app)
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest):
