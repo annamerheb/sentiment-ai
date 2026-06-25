@@ -216,12 +216,15 @@ pipeline {
                 echo "Attente démarrage (10 s)..."
                 sleep 10
 
-                docker exec sentiment-staging curl -f http://localhost:8000/health
+                # 1. L'app répond
+                docker exec sentiment-staging curl -f http://localhost:8000/health || exit 1
                 echo "/health OK"
 
-                docker exec sentiment-staging curl -s http://localhost:8000/metrics | grep -q sentiment_predictions_total
+                # 2. Les métriques sont exposées
+                docker exec sentiment-staging curl -s http://localhost:8000/metrics | grep -q sentiment_predictions_total || exit 1
                 echo "/metrics OK -- métriques SentimentAI présentes"
 
+                # 3. Prometheus scrape l'app
                 echo "Waiting for Prometheus scrape..."
 
                 for attempt in $(seq 1 12); do
@@ -229,7 +232,7 @@ pipeline {
                     'http://localhost:9090/api/v1/query' \
                     --data-urlencode 'query=up{job="sentiment-ai"}' || true)
 
-                echo "Prometheus attempt ${attempt}/12: $response"
+                echo "Prometheus response: $response"
 
                 if echo "$response" | grep -Eq '"value":[[:space:]]*\\[[^]]*,[[:space:]]*"1"\\]'; then
                     echo "Prometheus scrape sentiment-ai: UP"
@@ -245,7 +248,8 @@ pipeline {
                 sleep 5
                 done
 
-                docker exec grafana curl -f http://localhost:3000/api/health
+                # 4. Grafana répond
+                docker exec grafana curl -f http://localhost:3000/api/health || exit 1
                 echo "Grafana OK"
                 '''
             }
