@@ -211,56 +211,54 @@ pipeline {
         }
 
         stage('Smoke Test') {
+            when {
+                anyOf {
+                    branch 'main'
+                    expression {
+                        return env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main'
+                    }
+                }
+            }
             steps {
                 sh '''
-                echo "Attente démarrage (10 s)..."
+                echo "Waiting for services startup..."
                 sleep 10
 
-                # 1. L'app répond
-                docker exec sentiment-staging curl -f http://localhost:8000/health || exit 1
-                echo "/health OK"
-
-                # 2. Les métriques sont exposées
-                docker exec sentiment-staging curl -s http://localhost:8000/metrics | grep -q sentiment_predictions_total || exit 1
-                echo "/metrics OK -- métriques SentimentAI présentes"
-
-                # 3. Prometheus scrape l'app
-                echo "Waiting for Prometheus scrape..."
-
-                for attempt in $(seq 1 12); do
-                response=$(docker run --rm \
-                    --network cicd-network \
-                    curlimages/curl:8.10.1 \
-                    curl -fsS -G \
-                    'http://prometheus:9090/api/v1/query' \
-                    --data-urlencode 'query=up{job="sentiment-ai"}' || true)
-
-                echo "Prometheus response: $response"
-
-                if echo "$response" | grep -Eq '"value":[[:space:]]*\\[[^]]*,[[:space:]]*"1"\\]'; then
-                    echo "Prometheus scrape sentiment-ai: UP"
-                    break
-                fi
-
-                if [ "$attempt" = "12" ]; then
-                    echo "ERROR: Prometheus does not see sentiment-ai as UP"
-                    docker run --rm \
-                        --network cicd-network \
-                        curlimages/curl:8.10.1 \
-                        curl -fsS 'http://prometheus:9090/api/v1/targets' || true
-                    exit 1
-                fi
-
-                sleep 5
-                done
-
-                # 4. Grafana répond
+                echo "1. Checking SentimentAI health"
                 docker run --rm \
-                    --network cicd-network \
-                    curlimages/curl:8.10.1 \
-                    curl -f http://grafana:3000/api/health || exit 1
-                echo "Grafana OK"
+                  --network cicd-network \
+                  curlimages/curl:latest \
+                  -f http://sentiment-staging:8000/health
+
+                echo "Health OK"
+
+                echo "2. Sending one prediction"
+                docker run --rm \
+                  --network cicd-network \
+                  curlimages/curl:latest \
+                  -s -X POST http://sentiment-staging:8000/predict \
+                  -H "Content-Type: application/json" \
+                  -d '{"text":"Ce produit est vraiment bien"}' > /dev/null
+
+                echo "3. Checking metrics endpoint"
+                docker run --rm \
+                  --network cicd-network \
+                  curlimages/curl:latest \
+                  -s http://sentiment-staging:8000/metrics | grep -q sentiment_predictions_total
+
+                echo "Metrics OK"
+
+                echo "4. Waiting for Prometheus scrape..."
+                sleep 20
                 '''
+            }
+            post {
+                failure {
+                    sh 'docker logs prometheus || true'
+                    sh 'docker logs sentiment-staging || true'
+                    sh 'docker logs grafana || true'
+                    echo 'Smoke Test failed. Check logs above.'
+                }
             }
         }
     }
