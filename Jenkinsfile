@@ -228,8 +228,11 @@ pipeline {
                 echo "Waiting for Prometheus scrape..."
 
                 for attempt in $(seq 1 12); do
-                response=$(docker exec prometheus curl -fsS -G \
-                    'http://localhost:9090/api/v1/query' \
+                response=$(docker run --rm \
+                    --network cicd-network \
+                    curlimages/curl:8.10.1 \
+                    curl -fsS -G \
+                    'http://prometheus:9090/api/v1/query' \
                     --data-urlencode 'query=up{job="sentiment-ai"}' || true)
 
                 echo "Prometheus response: $response"
@@ -249,7 +252,10 @@ pipeline {
                 done
 
                 # 4. Grafana répond
-                docker exec grafana curl -f http://localhost:3000/api/health || exit 1
+                docker run --rm \
+                    --network cicd-network \
+                    curlimages/curl:8.10.1 \
+                    curl -f http://grafana:3000/api/health || exit 1
                 echo "Grafana OK"
                 '''
             }
