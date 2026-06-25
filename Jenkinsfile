@@ -205,6 +205,48 @@ pipeline {
                 echo "Staging disponible sur http://localhost:8001"
             }
         }
+
+        stage('Smoke Test') {
+            when {
+                expression {
+                    return env.GIT_BRANCH == 'origin/main' || env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'main'
+                }
+            }
+
+            steps {
+                sh '''
+                echo "Attente démarrage (10 s)..."
+                sleep 10
+
+                # 1. L'app répond
+                curl -f http://localhost:8001/health || exit 1
+                echo "/health OK"
+
+                # 2. Les métriques sont exposées
+                curl -s http://localhost:8001/metrics | \
+                    grep -q sentiment_predictions_total || exit 1
+                echo "/metrics OK -- métriques SentimentAI présentes"
+
+                # 3. Prometheus scrape l'app
+                sleep 20
+                curl -s "http://localhost:9090/api/v1/query?query=up{job='sentiment-ai'}" | \
+                    grep -q '"value".*:.*1' || exit 1
+                echo "Prometheus scrape sentiment-ai: UP"
+
+                # 4. Grafana répond
+                curl -f http://localhost:3000/api/health || exit 1
+                echo "Grafana OK"
+                '''
+            }
+
+            post {
+                failure {
+                sh 'docker logs prometheus || true'
+                sh 'docker logs sentiment-staging || true'
+                echo 'Smoke Test KO -- voir logs ci-dessus'
+                }
+            }
+        }
     }
 
     post {

@@ -1,0 +1,90 @@
+{
+  "version": 4,
+  "terraform_version": "1.15.6",
+  "serial": 12,
+  "lineage": "89ee438f-dd7d-9bb6-7b90-f24127b97ff0",
+  "outputs": {
+    "app_url": {
+      "value": "http://localhost:8001",
+      "type": "string"
+    },
+    "container_id": {
+      "value": "35887cdc2563d02baf6a35e99908afe6971013fab78df269bee4b43ec54fda23",
+      "type": "string"
+    },
+    "network_name": {
+      "value": "cicd-network",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "docker_image",
+      "name": "sentiment",
+      "provider": "provider[\"registry.terraform.io/kreuzwerker/docker\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "build": [],
+            "force_remove": null,
+            "id": "sha256:7fc4a419bafa9b61e8dff7d36a601b4a201410cf75d78c65843f77ffe009d4cfsentiment-ai:latest",
+            "image_id": "sha256:7fc4a419bafa9b61e8dff7d36a601b4a201410cf75d78c65843f77ffe009d4cf",
+            "keep_locally": true,
+            "name": "sentiment-ai:latest",
+            "platform": null,
+            "pull_triggers": null,
+            "repo_digest": "sentiment-ai@sha256:7fc4a419bafa9b61e8dff7d36a601b4a201410cf75d78c65843f77ffe009d4cf",
+            "timeouts": null,
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "docker_network",
+      "name": "cicd",
+      "provider": "provider[\"registry.terraform.io/kreuzwerker/docker\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "attachable": false,
+            "check_duplicate": null,
+            "driver": "bridge",
+            "id": "98ff18e7fd7b37104503d8cf2748ce12eec00e7c5ec6fe5db08a587d6f330eed",
+            "ingress": false,
+            "internal": false,
+            "ipam_config": [
+              {
+                "aux_address": {},
+                "gateway": "172.20.0.1",
+                "ip_range": "",
+                "subnet": "172.20.0.0/16"
+              }
+            ],
+            "ipam_driver": "default",
+            "ipam_options": {},
+            "ipv6": false,
+            "labels": [],
+            "name": "cicd-network",
+            "options": {
+              "com.docker.network.enable_ipv4": "true",
+              "com.docker.network.enable_ipv6": "false"
+            },
+            "scope": "local"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ=="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
