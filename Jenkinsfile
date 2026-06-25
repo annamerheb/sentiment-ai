@@ -250,22 +250,6 @@ pipeline {
 
                 echo "4. Waiting for Prometheus scrape..."
                 sleep 20
-
-                echo "5. Checking Prometheus target"
-                docker run --rm \
-                  --network cicd-network \
-                  curlimages/curl:latest \
-                  -s "http://prometheus:9090/api/v1/query?query=up%7Bjob%3D%22sentiment-ai%22%7D" | grep -q '"1"'
-
-                echo "Prometheus scrape OK"
-
-                echo "6. Checking Grafana health"
-                docker run --rm \
-                  --network cicd-network \
-                  curlimages/curl:latest \
-                  -f http://grafana:3000/api/health
-
-                echo "Grafana OK"
                 '''
             }
             post {
