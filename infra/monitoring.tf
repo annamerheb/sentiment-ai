@@ -9,7 +9,7 @@ resource "docker_container" "prometheus" {
   restart = "unless-stopped"
 
   networks_advanced {
-    name = docker_network.cicd.name
+    name = "cicd-network"
   }
 
   ports {
@@ -35,7 +35,7 @@ resource "docker_container" "grafana" {
   restart = "unless-stopped"
 
   networks_advanced {
-    name = docker_network.cicd.name
+    name = "cicd-network"
   }
 
   ports {
