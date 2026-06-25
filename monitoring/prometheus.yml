@@ -3,15 +3,16 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - 'alerts.yml'
+  - "alerts.yml"
 
 scrape_configs:
-  - job_name: 'sentiment-ai'
+  - job_name: "sentiment-ai"
     static_configs:
       - targets:
-          - 'sentiment-staging:8000' # nom DNS Docker
+          - "sentiment-staging:8000"
     metrics_path: /metrics
 
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets:
+          - "localhost:9090"

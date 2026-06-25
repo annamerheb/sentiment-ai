@@ -3,6 +3,10 @@ resource "docker_image" "prometheus" {
   keep_locally = true
 }
 
+resource "docker_volume" "prometheus_data" {
+  name = "prometheus_data"
+}
+
 resource "docker_container" "prometheus" {
   name    = "prometheus"
   image   = docker_image.prometheus.image_id
@@ -17,27 +21,34 @@ resource "docker_container" "prometheus" {
     external = 9090
   }
 
+  upload {
+    content = file("${path.module}/../monitoring/prometheus.yml")
+    file    = "/etc/prometheus/prometheus.yml"
+  }
+
+  upload {
+    content = file("${path.module}/../monitoring/alerts.yml")
+    file    = "/etc/prometheus/alerts.yml"
+  }
+
+  volumes {
+    volume_name    = docker_volume.prometheus_data.name
+    container_path = "/prometheus"
+  }
+
   command = [
     "--config.file=/etc/prometheus/prometheus.yml",
     "--storage.tsdb.retention.time=15d"
   ]
-
-  volumes {
-    host_path      = "/var/jenkins_home/workspace/sentiment-ai-pipeline/monitoring/prometheus.yml"
-    container_path = "/etc/prometheus/prometheus.yml"
-    read_only      = true
-  }
-
-  volumes {
-    host_path      = "/var/jenkins_home/workspace/sentiment-ai-pipeline/monitoring/alerts.yml"
-    container_path = "/etc/prometheus/alerts.yml"
-    read_only      = true
-  }
 }
 
 resource "docker_image" "grafana" {
   name         = "grafana/grafana:latest"
   keep_locally = true
+}
+
+resource "docker_volume" "grafana_data" {
+  name = "grafana_data"
 }
 
 resource "docker_container" "grafana" {
@@ -57,4 +68,9 @@ resource "docker_container" "grafana" {
   env = [
     "GF_SECURITY_ADMIN_PASSWORD=admin"
   ]
+
+  volumes {
+    volume_name    = docker_volume.grafana_data.name
+    container_path = "/var/lib/grafana"
+  }
 }
