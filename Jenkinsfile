@@ -198,16 +198,8 @@ pipeline {
                 }
             }
             steps {
-                echo "Déploiement de ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} en staging..."
-                sh """
-                    docker stop sentiment-ai-staging 2>/dev/null || true
-                    docker rm sentiment-ai-staging 2>/dev/null || true
-                    docker run -d \
-                        --name sentiment-ai-staging \
-                        -p 8001:8000 \
-                        ${IMAGE_NAME}:${IMAGE_TAG}
-                    echo "Staging disponible sur http://localhost:8001"
-                """
+                sh 'sleep 3 && curl -f http://localhost:8001/health || exit 1'
+                echo "Staging disponible sur http://localhost:8001"
             }
         }
     }
