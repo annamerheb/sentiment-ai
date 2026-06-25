@@ -182,6 +182,10 @@ pipeline {
                     sh '''
                         docker stop sentiment-staging || true
                         docker rm sentiment-staging || true
+                        docker stop prometheus || true
+                        docker rm prometheus || true
+                        docker stop grafana || true
+                        docker rm grafana || true
                     '''
                     sh """
                         terraform apply -auto-approve \
