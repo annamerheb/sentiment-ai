@@ -244,7 +244,10 @@ pipeline {
 
                 if [ "$attempt" = "12" ]; then
                     echo "ERROR: Prometheus does not see sentiment-ai as UP"
-                    docker exec prometheus curl -fsS 'http://localhost:9090/api/v1/targets' || true
+                    docker run --rm \
+                        --network cicd-network \
+                        curlimages/curl:8.10.1 \
+                        curl -fsS 'http://prometheus:9090/api/v1/targets' || true
                     exit 1
                 fi
 
