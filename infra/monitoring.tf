@@ -1,3 +1,8 @@
+resource "docker_image" "prometheus" {
+  name         = "prom/prometheus:latest"
+  keep_locally = true
+}
+
 resource "docker_container" "prometheus" {
   name    = "prometheus"
   image   = docker_image.prometheus.image_id
@@ -18,11 +23,6 @@ resource "docker_container" "prometheus" {
   ]
 
   volumes {
-    volume_name    = "prometheus_data"
-    container_path = "/prometheus"
-  }
-
-  volumes {
     host_path      = "/var/jenkins_home/workspace/sentiment-ai-pipeline/monitoring/prometheus.yml"
     container_path = "/etc/prometheus/prometheus.yml"
     read_only      = true
@@ -33,4 +33,28 @@ resource "docker_container" "prometheus" {
     container_path = "/etc/prometheus/alerts.yml"
     read_only      = true
   }
+}
+
+resource "docker_image" "grafana" {
+  name         = "grafana/grafana:latest"
+  keep_locally = true
+}
+
+resource "docker_container" "grafana" {
+  name    = "grafana"
+  image   = docker_image.grafana.image_id
+  restart = "unless-stopped"
+
+  networks_advanced {
+    name = "cicd-network"
+  }
+
+  ports {
+    internal = 3000
+    external = 3000
+  }
+
+  env = [
+    "GF_SECURITY_ADMIN_PASSWORD=admin"
+  ]
 }
